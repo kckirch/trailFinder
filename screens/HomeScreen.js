@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { SearchBar } from 'react-native-elements';
 import TrailCard from '../components/TrailCard';
+import * as Location from 'expo-location';
+import Geocoder from 'react-native-geocoding';
 //import api from '../services/api';
 
+
 const HomeScreen = ({ navigation }) => {
+
+  Geocoder.init("AIzaSyDqW8jK0xxnIRKTKXACxIK-q3UerQTiCsA");
+
   // Hardcoded trails for testing purposes
   const exampleTrails = [
     {
@@ -82,8 +89,34 @@ const HomeScreen = ({ navigation }) => {
 
   ];
 
+  // useState to manage the search query
+  const [search, setSearch] = useState('');
+
+
+
+
+  // Function to handle search query updates
+  const updateSearch = (search) => {
+    setSearch(search);
+  };
+
+
   return (
+
     <View style={styles.container}>
+
+      {/* Add the SearchBar component */}
+      <SearchBar
+        placeholder="Search for trails..."
+        onChangeText={updateSearch}
+        value={search}
+        lightTheme
+        round
+        containerStyle={styles.searchContainer}
+        inputContainerStyle={styles.searchInputContainer}
+        inputStyle={styles.searchInput}
+      />
+
       <Text>Maybe we should Add like current location here?</Text>
       <FlatList
         data={exampleTrails}
@@ -93,6 +126,7 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -103,6 +137,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  searchContainer: {
+    backgroundColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent',
+    paddingHorizontal: 10,
+  },
+  searchInputContainer: {
+    backgroundColor: '#e6e6e6',
+    borderRadius: 50,
+  },
+  searchInput: {
+    color: '#333',
   },
 });
 

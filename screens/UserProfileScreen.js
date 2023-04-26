@@ -7,7 +7,7 @@ import Geocoder from 'react-native-geocoding';
 
 
 
-Geocoder.init("AIzaSyDqW8jK0xxnIRKTKXACxIK-q3UerQTiCsA")
+Geocoder.init("AIzaSyDqW8jK0xxnIRKTKXACxIK-q3UerQTiCsA");
 
 const UserProfileScreen = () => {
   const [userData, setUserData] = useState({
