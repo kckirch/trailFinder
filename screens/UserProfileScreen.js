@@ -2,6 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapView, { Marker } from 'react-native-maps';
+import Geocoder from 'react-native-geocoding';
+
+
+
+
+Geocoder.init("AIzaSyDqW8jK0xxnIRKTKXACxIK-q3UerQTiCsA")
 
 const UserProfileScreen = () => {
   const [userData, setUserData] = useState({
@@ -10,6 +16,7 @@ const UserProfileScreen = () => {
     location: {
       latitude: null,
       longitude: null,
+      address: null,
     },
     
   });
@@ -17,20 +24,32 @@ const UserProfileScreen = () => {
   const [isNameEditable, setIsNameEditable] = useState(false);
   const [isEmailEditable, setIsEmailEditable] = useState(false);
   const [isLocationEditable, setIsLocationEditable] = useState(false);
+  const [address, setAddress] = useState('');
 
   useEffect(() => {
     const defaultData = {
       name: '',
-      email: 'johndoe@example.com',
+      email: '',
       location: {
         latitude: null,
         longitude: null,
+        address: null,
       },
       
     };
 
     const fetchUserData = async () => {
-      // ... Previous fetchUserData function
+      const storedUserData = JSON.parse(await AsyncStorage.getItem('userProfile'));
+      setUserData((prevState) => ({
+        ...prevState,
+        name: storedUserData.name || '',
+        email: storedUserData.email || '',
+        location: {
+          latitude: prevState.location.latitude || storedUserData.location.latitude,
+          longitude: prevState.location.longitude || storedUserData.location.longitude,
+          address: storedUserData.location.address || '',
+        },
+      }));
     };
     fetchUserData();
   }, []);
@@ -54,15 +73,30 @@ const UserProfileScreen = () => {
     const storedUserData = JSON.parse(await AsyncStorage.getItem('userProfile'));
     setUserData((prevState) => ({
       ...prevState,
-      name: storedUserData.name || '',
-      email: storedUserData.email || '',
+      name: userData.name,
+      email: userData.email,
       location: {
-        latitude: prevState.location.latitude || storedUserData.location.latitude,
-        longitude: prevState.location.longitude || storedUserData.location.longitude,
+        ...prevState.location,
+        latitude: userData.location.latitude,
+        longitude: userData.location.longitude,
+        address: address || prevState.location.address,
       },
     }));
-    await AsyncStorage.setItem('userProfile', JSON.stringify(userData));
-  }, [userData]);
+    await AsyncStorage.setItem(
+      'userProfile',
+      JSON.stringify({
+        ...storedUserData,
+        name: userData.name,
+        email: userData.email,
+        location: {
+          ...storedUserData.location,
+          latitude: userData.location.latitude,
+          longitude: userData.location.longitude,
+          address: address || storedUserData.location.address,
+        },
+      }),
+    );
+  }, [address, userData]);
   
 
   const handleNameChange = useCallback((text) => {
@@ -73,15 +107,31 @@ const UserProfileScreen = () => {
     setUserData((prevState) => ({ ...prevState, email: text }));
   }, []);
 
-  const handleLocationChange = useCallback((newLocation) => {
-    setUserData((prevState) => ({
-      ...prevState,
-      location: {
-        ...prevState.location,
-        ...newLocation,
-      },
-    }));
+  const handleAddressChange = useCallback((text) => {
+    setAddress(text);
   }, []);
+
+  const handleLocationChange = useCallback(
+    
+    async (location) => {
+      console.log('address:', address);
+      try {
+        const res = await Geocoder.from(location.latitude, location.longitude);
+        const address = res.results[0].formatted_address;
+        setUserData((prevState) => ({
+          ...prevState,
+          location: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            address,
+          },
+        }));
+      } catch (error) {
+      console.log(error);
+    }
+  }, []);
+  
+  
   
 
   return (
@@ -112,13 +162,20 @@ const UserProfileScreen = () => {
       <Text style={styles.name}>{userData.name || 'Guest User'}</Text>
       <Text style={styles.email}>{userData.email}</Text>
 
-      {userData.location.latitude && userData.location.longitude && (
-        <View style={styles.locationContainer}>
-          <Text style={styles.locationTitle}>Your Location:</Text>
-          <Text style={styles.locationText}>Latitude: {userData.location.latitude}</Text>
-          <Text style={styles.locationText}>Longitude: {userData.location.longitude}</Text>
-        </View>
-      )}
+
+
+
+      {/* this needs {userData.location.latitude && userData.location.longitude &&( still*/}
+      <View style={styles.locationContainer}>
+        <Text style={styles.locationTitle}>Your Location:</Text>
+        <Text style={styles.locationText}>Latitude: {userData.location.latitude}</Text>
+        <Text style={styles.locationText}>Longitude: {userData.location.longitude}</Text>
+        <Text style={styles.locationText}>Address: {userData.location.address}</Text>
+      </View>
+      
+      
+
+
       
       <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
         <Text style={styles.buttonText}>Edit Name</Text>
@@ -168,23 +225,16 @@ const UserProfileScreen = () => {
           <Text style={styles.modalTitle}>Edit Location</Text>
           <TextInput
             style={styles.modalInput}
-            onChangeText={(text) => handleLocationChange({ ...userData.location, latitude: parseFloat(text) })}
-            value={userData.location.latitude?.toString()}
-            placeholder="Enter your latitude"
-            keyboardType="decimal-pad"
-          />
-          <TextInput
-            style={styles.modalInput}
-            onChangeText={(text) => handleLocationChange({ ...userData.location, longitude: parseFloat(text) })}
-            value={userData.location.longitude?.toString()}
-            placeholder="Enter your longitude"
-            keyboardType="decimal-pad"
+            onChangeText={handleAddressChange}
+            value={address}
+            placeholder="Enter your location"
           />
           <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
             <Text style={styles.buttonText}>Save</Text>
           </TouchableOpacity>
         </View>
       </Modal>
+
 
     </View>
   );
