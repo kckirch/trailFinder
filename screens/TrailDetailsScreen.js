@@ -2,13 +2,16 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 const TrailDetailsScreen = ({ route }) => {
-  // const { trail } = route.params;
+  const trail = route.params?.trail || {
+    name: 'No trail selected',
+    location: 'Please go back and select a trail',
+  }
 
   return (
     <View style={styles.container}>
-      
-      <Text style={styles.title}>{"Trail Name"}</Text>
-      <Text>{"Trail desc"}</Text>
+      <Text style={styles.title}>{trail.name}</Text>
+      <Text>{trail.location}</Text>
+      {/* Add any other trail details you want to display */}
     </View>
   );
 };

@@ -88,7 +88,7 @@ const HomeScreen = ({ navigation }) => {
       <FlatList
         data={exampleTrails}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate('TrailDetails', { trail: item })}>
+          <TouchableOpacity onPress={() => navigation.navigate('Trails', { trail: item })}>
             <TrailCard trail={item} />
           </TouchableOpacity>
         )}
