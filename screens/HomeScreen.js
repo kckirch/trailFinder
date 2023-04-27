@@ -43,7 +43,7 @@ const HomeScreen = ({ navigation }) => {
   
 
   useEffect(() => {
-    fetchTrails();
+    //fetchTrails();
   }, []);
 
   useEffect(() => {

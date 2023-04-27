@@ -26,28 +26,18 @@ const UserProfileScreen = () => {
   const [isLocationEditable, setIsLocationEditable] = useState(false);
   const [address, setAddress] = useState('');
 
+  
   useEffect(() => {
-    const defaultData = {
-      name: '',
-      email: '',
-      location: {
-        latitude: null,
-        longitude: null,
-        address: null,
-      },
-      
-    };
-
     const fetchUserData = async () => {
       const storedUserData = JSON.parse(await AsyncStorage.getItem('userProfile'));
       setUserData((prevState) => ({
         ...prevState,
-        name: storedUserData.name || '',
-        email: storedUserData.email || '',
+        name: storedUserData?.name || '',
+        email: storedUserData?.email || '',
         location: {
-          latitude: prevState.location.latitude || storedUserData.location.latitude,
-          longitude: prevState.location.longitude || storedUserData.location.longitude,
-          address: storedUserData.location.address || '',
+          latitude: storedUserData?.location?.latitude || null,
+          longitude: storedUserData?.location?.longitude || null,
+          address: storedUserData?.location?.address || '',
         },
       }));
     };
@@ -112,7 +102,6 @@ const UserProfileScreen = () => {
   }, []);
 
   const handleLocationChange = useCallback(
-    
     async (location) => {
       console.log('address:', address);
       try {
@@ -127,9 +116,12 @@ const UserProfileScreen = () => {
           },
         }));
       } catch (error) {
-      console.log(error);
-    }
-  }, []);
+        console.log(error);
+      }
+    },
+    []
+  );
+  
   
   
   
