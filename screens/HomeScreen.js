@@ -54,6 +54,7 @@ const HomeScreen = ({ navigation }) => {
   (async () => {
     const trailsData = await fetchTrails(40.0274, -105.2519, 25, 10);
     console.log('Returned data:', trailsData);
+    
   })();
 
 
