@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {
+  Text,
+  View,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Button,
+  Modal,
+  TextInput,
+} from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import TrailCard from '../components/TrailCard';
 import * as Location from 'expo-location';
 import Geocoder from 'react-native-geocoding';
-
-//import api from '../services/api';
 
 Geocoder.init('AIzaSyDqW8jK0xxnIRKTKXACxIK-q3UerQTiCsA');
 
@@ -15,6 +23,8 @@ const HomeScreen = ({ navigation }) => {
   const [city, setCity] = useState('');
   const [trails, setTrails] = useState([]);
   const [filteredTrails, setFilteredTrails] = useState([]);
+  const [locationModalVisible, setLocationModalVisible] = useState(false);
+  const [newLocation, setNewLocation] = useState('');
 
   const fetchTrails = async (latitude, longitude, radius = 25, limit = 10) => {
     try {
@@ -52,12 +62,28 @@ const HomeScreen = ({ navigation }) => {
     }
   };
   
-  
-  (async () => {
-    const trailsData = await fetchTrails(40.0274, -105.2519, 25, 10);
-    console.log('Returned data:', trailsData);
-    
-  })();
+  const handleLocationChange = async () => {
+    setLocationModalVisible(false);
+    if (newLocation) {
+      try {
+        const geocodeResult = await Geocoder.from(newLocation);
+        if (geocodeResult.results.length > 0) {
+          const { lat, lng } = geocodeResult.results[0].geometry.location;
+          const trailsData = await fetchTrails(lat, lng);
+          if (trailsData) {
+            setTrails(trailsData.data);
+            setCity(geocodeResult.results[0].formatted_address);
+          }
+        } else {
+          alert('No results found for the entered location.');
+        }
+      } catch (error) {
+        console.error('Error changing location:', error);
+        alert('Error changing location. Please try again.');
+      }
+    }
+    setNewLocation('');
+  };
 
 
   useEffect(() => {
@@ -105,15 +131,50 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <SearchBar
-        placeholder="Search for trails..."
-        onChangeText={updateSearch}
-        value={search}
-        lightTheme
-        round
-      />
+    <SearchBar
+      placeholder="Search for trails..."
+      onChangeText={updateSearch}
+      value={search}
+      lightTheme
+      round
+    />
 
-      {city && <Text>Current location: {city}</Text>}
+    {city && (
+      <View style={styles.locationContainer}>
+        <Text style={styles.locationText}>Current location: {city}</Text>
+        <Button
+          title="Change location"
+          onPress={() => setLocationModalVisible(true)}
+        />
+      </View>
+    )}
+
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={locationModalVisible}
+      onRequestClose={() => {
+        setLocationModalVisible(false);
+      }}
+    >
+      <View style={styles.modalView}>
+        <Text style={styles.modalText}>Enter a new location:</Text>
+        <TextInput
+          style={styles.textInput}
+          onChangeText={setNewLocation}
+          value={newLocation}
+          placeholder="Address or city"
+          placeholderTextColor="black"
+        />
+        <Button title="Update location" onPress={handleLocationChange} />
+        <Button
+          title="Cancel"
+          onPress={() => setLocationModalVisible(false)}
+        />
+      </View>
+    </Modal>
+
+
 
       {isLoading && (
         <View style={styles.spinnerContainer}>
@@ -151,7 +212,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 100,
   },
+  locationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  locationText: {
+    fontSize: 18,
+    marginRight: 10,
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 15,
+  },
+  textInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    width: '80%',
+    marginBottom: 15,
+  },
 });
+
+
 
 
 export default HomeScreen;
