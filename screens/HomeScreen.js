@@ -157,23 +157,26 @@ const HomeScreen = ({ navigation }) => {
         setLocationModalVisible(false);
       }}
     >
-      <View style={styles.modalView}>
-        <Text style={styles.modalText}>Enter a new location:</Text>
-        <TextInput
-          style={styles.textInput}
-          onChangeText={setNewLocation}
-          value={newLocation}
-          placeholder="Address or city"
-          placeholderTextColor="black"
-        />
-        <Button title="Update location" onPress={handleLocationChange} />
-        <Button
-          title="Cancel"
-          onPress={() => setLocationModalVisible(false)}
-        />
+      <View style={styles.modalBackground}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>Enter a new location:</Text>
+          <TextInput
+            style={styles.textInput}
+            onChangeText={setNewLocation}
+            value={newLocation}
+            placeholder="Address or city"
+            placeholderTextColor="black"
+          />
+          <View style={styles.buttonContainer}>
+            <Button title="Update location" onPress={handleLocationChange} />
+            <Button
+              title="Cancel"
+              onPress={() => setLocationModalVisible(false)}
+            />
+          </View>
+        </View>
       </View>
     </Modal>
-
 
 
       {isLoading && (
@@ -240,6 +243,47 @@ const styles = StyleSheet.create({
     width: '80%',
     marginBottom: 15,
   },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    minWidth: '80%',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 15,
+  },
+  textInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    width: '100%',
+    marginBottom: 15,
+    borderRadius: 5,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+  },
+  
 });
 
 
