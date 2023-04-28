@@ -14,10 +14,16 @@ const HomeScreen = ({ navigation }) => {
   const [trails, setTrails] = useState([]);
   const [filteredTrails, setFilteredTrails] = useState([]);
 
-  const fetchTrail = async (trailId) => {
+  const fetchTrails = async (latitude, longitude, radius = 25, limit = 10) => {
     try {
       const apiKey = '577e3d15b9msh3ffe98e39aa7cc0p138d71jsna5351c9b8a88';
-      const url = `https://trailapi-trailapi.p.rapidapi.com/trails/${trailId}`;
+      const queryParams = new URLSearchParams({
+        lat: latitude,
+        lon: longitude,
+        radius: radius,
+        limit: limit,
+      });
+      const url = `https://trailapi-trailapi.p.rapidapi.com/trails/explore/?${queryParams}`;
   
       const response = await fetch(url, {
         method: 'GET',
@@ -32,15 +38,23 @@ const HomeScreen = ({ navigation }) => {
       console.log('API response:', data);
   
       if (data) {
-        // Do something with the trail data
+        // Return the trail data
+        return data;
       } else {
-        console.error('Error fetching trail: Invalid response format');
+        console.error('Error fetching trails: Invalid response format');
+        return null;
       }
     } catch (error) {
-      console.error('Error fetching trail:', error);
+      console.error('Error fetching trails:', error);
+      return null;
     }
   };
   
+  
+  (async () => {
+    const trailsData = await fetchTrails(40.0274, -105.2519, 25, 10);
+    console.log('Returned data:', trailsData);
+  })();
 
   useEffect(() => {
     //fetchTrails();
