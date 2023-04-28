@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import RatingStars from './RatingStars';
 
-const TrailCard = ({ trail }) => {
+const TrailCard = React.memo(({ trail }) => {
   return (
     <View style={styles.card}>
       <Image source={{ uri: trail.thumbnail }} style={styles.image} />
@@ -13,7 +13,7 @@ const TrailCard = ({ trail }) => {
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   card: {

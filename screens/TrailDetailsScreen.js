@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, SectionList } from 'react-native';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { useNavigation } from '@react-navigation/native';
 
@@ -22,15 +22,25 @@ const TrailDetailsScreen = ({ route }) => {
     });
   }, [navigation]);
 
+  const sections = [
+    { title: 'Location', data: [`${trail.city ? `City: ${trail.city}` : ''}`, `${trail.country ? `Country: ${trail.country}` : ''}`, `${trail.region ? `Region: ${trail.region}` : ''}`] },
+    { title: 'Trail Details', data: [`${trail.difficulty ? `Difficulty: ${trail.difficulty}` : ''}`, `${trail.length ? `Length: ${trail.length} miles` : ''}`,
+      trail.rating ? `Rating: ${trail.rating}` : null, `${trail.features ? `Features: ${trail.features}` : ''}`] },
+    { title: 'Description', data: [`${trail.description ? trail.description : ''}`] },
+    { title: 'Directions', data: [`${trail.directions ? trail.directions : ''}`] },
+  ];
+  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{trail.name}</Text>
       <Image source={{ uri: trail.thumbnail }} style={styles.image} />
-      <Text>{trail.location}</Text>
-      <Text>Difficulty: {trail.difficulty}</Text>
-      <Text>Length: {trail.length} miles</Text>
-      <Text>Ascent: {trail.ascent} feet</Text>
-      {/* Add any other trail details you want to display */}
+      <SectionList
+        sections={sections}
+        renderItem={({ item }) => <Text style={styles.item}>{item}</Text>}
+        renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+        keyExtractor={(item, index) => index}
+      />
     </View>
   );
 };
@@ -38,19 +48,34 @@ const TrailDetailsScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
     backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    textAlign: 'center',
+    paddingTop: 5,
   },
   image: {
     width: '100%',
     height: 200,
-    marginBottom: 10,
+    marginBottom: 20,
     resizeMode: 'cover',
+  },
+  sectionHeader: {
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    fontSize: 20,
+    fontWeight: '600',
+    color: 'black',
+  },
+  item: {
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    fontSize: 16,
+    color: 'black',
   },
 });
 
