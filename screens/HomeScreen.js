@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator} from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import TrailCard from '../components/TrailCard';
 import * as Location from 'expo-location';
 import Geocoder from 'react-native-geocoding';
+
 //import api from '../services/api';
 
 Geocoder.init('AIzaSyDqW8jK0xxnIRKTKXACxIK-q3UerQTiCsA');
 
 const HomeScreen = ({ navigation }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [city, setCity] = useState('');
   const [trails, setTrails] = useState([]);
@@ -60,6 +62,7 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true); // set loading indicator to true
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         alert('Permission to access location was denied');
@@ -82,6 +85,7 @@ const HomeScreen = ({ navigation }) => {
       );
       if (trailsData) {
         setTrails(trailsData.data);
+        setIsLoading(false); // set loading indicator to false
       }
     })();
   }, []);
@@ -111,6 +115,12 @@ const HomeScreen = ({ navigation }) => {
 
       {city && <Text>Current location: {city}</Text>}
 
+      {isLoading && (
+        <View style={styles.spinnerContainer}>
+          <ActivityIndicator size="large" color="#4a4a4a" />
+        </View>
+      )}
+
       <FlatList
         data={filteredTrails}
         renderItem={({ item }) => (
@@ -130,6 +140,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  spinnerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
 });
+
 
 export default HomeScreen;
