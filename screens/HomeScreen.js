@@ -56,9 +56,6 @@ const HomeScreen = ({ navigation }) => {
     console.log('Returned data:', trailsData);
   })();
 
-  useEffect(() => {
-    //fetchTrails();
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -78,9 +75,16 @@ const HomeScreen = ({ navigation }) => {
         setCity(result[0].city);
       }
   
-      fetchTrails(currentLocation.coords.latitude, currentLocation.coords.longitude);
+      const trailsData = await fetchTrails(
+        currentLocation.coords.latitude,
+        currentLocation.coords.longitude
+      );
+      if (trailsData) {
+        setTrails(trailsData.data);
+      }
     })();
   }, []);
+  
   
 
   useEffect(() => {

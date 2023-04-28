@@ -1,16 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
+
 const TrailDetailsScreen = ({ route }) => {
   const trail = route.params?.trail || {
     name: 'No trail selected',
     location: 'Please go back and select a trail',
-  }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{trail.name}</Text>
       <Text>{trail.location}</Text>
+      <Text>Difficulty: {trail.difficulty}</Text>
+      <Text>Length: {trail.length} miles</Text>
+      <Text>Ascent: {trail.ascent} feet</Text>
       {/* Add any other trail details you want to display */}
     </View>
   );
@@ -30,3 +34,4 @@ const styles = StyleSheet.create({
 });
 
 export default TrailDetailsScreen;
+

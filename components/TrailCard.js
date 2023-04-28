@@ -5,7 +5,7 @@ import RatingStars from './RatingStars';
 const TrailCard = ({ trail }) => {
   return (
     <View style={styles.card}>
-      <Image source={{ uri: trail.image }} style={styles.image} />
+      <Image source={{ uri: trail.thumbnail }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.name}>{trail.name}</Text>
         <Text style={styles.location}>{trail.location}</Text>
