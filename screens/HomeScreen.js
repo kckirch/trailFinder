@@ -14,6 +14,7 @@ import { SearchBar } from 'react-native-elements';
 import TrailCard from '../components/TrailCard';
 import * as Location from 'expo-location';
 import Geocoder from 'react-native-geocoding';
+import * as SQLite from 'expo-sqlite';
 
 Geocoder.init('AIzaSyDqW8jK0xxnIRKTKXACxIK-q3UerQTiCsA');
 
@@ -25,7 +26,21 @@ const HomeScreen = ({ navigation }) => {
   const [filteredTrails, setFilteredTrails] = useState([]);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const [newLocation, setNewLocation] = useState('');
-
+  const db = SQLite.openDatabase('trails.db');
+  
+  const initDB = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS trails (url TEXT PRIMARY KEY, data TEXT, timestamp INTEGER);',
+        [],
+        () => console.log('Table created/checked successfully'),
+        (_, error) => console.log('Error creating/checking table:', error)
+      );
+    });
+  };
+  
+  initDB();
+  
   const fetchTrails = async (latitude, longitude, radius = 25, limit = 10) => {
     try {
       const apiKey = '577e3d15b9msh3ffe98e39aa7cc0p138d71jsna5351c9b8a88';
@@ -36,6 +51,31 @@ const HomeScreen = ({ navigation }) => {
         limit: limit,
       });
       const url = `https://trailapi-trailapi.p.rapidapi.com/trails/explore/?${queryParams}`;
+  
+      const storedData = await new Promise((resolve, reject) => {
+        db.transaction(tx => {
+          tx.executeSql(
+            'SELECT data FROM trails WHERE url = ?;',
+            [url],
+            (_, { rows }) => {
+              if (rows.length) {
+                resolve(rows.item(0).data);
+              } else {
+                resolve(null);
+              }
+            },
+            (_, error) => {
+              console.log('Error fetching stored data:', error);
+              reject(error);
+            }
+          );
+        });
+      });
+  
+      if (storedData) {
+        console.log('Returning data from SQLite:', JSON.parse(storedData));
+        return JSON.parse(storedData);
+      }
   
       const response = await fetch(url, {
         method: 'GET',
@@ -50,6 +90,16 @@ const HomeScreen = ({ navigation }) => {
       console.log('API response:', data);
   
       if (data) {
+        // Store the trail data in SQLite
+        db.transaction(tx => {
+          tx.executeSql(
+            'INSERT OR REPLACE INTO trails (url, data, timestamp) VALUES (?, ?, ?);',
+            [url, JSON.stringify(data), Date.now()],
+            () => console.log('Data stored in SQLite successfully'),
+            (_, error) => console.log('Error storing data in SQLite:', error)
+          );
+        });
+  
         // Return the trail data
         return data;
       } else {
@@ -61,6 +111,11 @@ const HomeScreen = ({ navigation }) => {
       return null;
     }
   };
+  
+  
+  
+  
+  
   
   const handleLocationChange = async () => {
     setLocationModalVisible(false);
