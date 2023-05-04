@@ -1,7 +1,11 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, SectionList } from 'react-native';
+import { View, Text, Image, StyleSheet, SectionList, TouchableOpacity } from 'react-native';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+
+
 
 const TrailDetailsScreen = ({ route }) => {
   const trail = route.params?.trail || {
@@ -29,11 +33,25 @@ const TrailDetailsScreen = ({ route }) => {
     { title: 'Description', data: [`${trail.description ? trail.description : ''}`] },
     { title: 'Directions', data: [`${trail.directions ? trail.directions : ''}`] },
   ];
+
+  const [isFavorited, setIsFavorited] = React.useState(false);
+
+  const toggleFavorite = () => {
+    setIsFavorited(!isFavorited);
+  };
+
   
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{trail.name}</Text>
+      <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteIcon}>
+        <Icon
+          name={isFavorited ? 'star' : 'star-o'}
+          size={30}
+          color={isFavorited ? 'gold' : 'gray'}
+        />
+    </TouchableOpacity>
       <Image source={{ uri: trail.thumbnail }} style={styles.image} />
       <SectionList
         sections={sections}
@@ -77,6 +95,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
   },
+  favoriteIcon: {
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  
 });
 
 export default TrailDetailsScreen;
